@@ -1,0 +1,5 @@
+accessKey: minioadmin
+secretKey: minioadmin
+persistence:
+  enabled: true
+  size: 50Gi

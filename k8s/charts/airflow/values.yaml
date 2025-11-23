@@ -1,0 +1,6 @@
+executor: LocalExecutor
+airflow:
+  fernetKey: "REPLACE_FERNET_KEY"
+  secretKey: "REPLACE_SECRET_KEY"
+postgresql:
+  enabled: false

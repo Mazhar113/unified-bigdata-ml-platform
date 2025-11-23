@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlflow
+  namespace: unified
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: mlflow }
+  template:
+    metadata:
+      labels: { app: mlflow }
+    spec:
+      containers:
+      - name: mlflow
+        image: cr.fly.io/mlflow/mlflow:2.4.1
+        env:
+        - name: BACKEND_STORE_URI
+          value: postgresql://mlflow:REPLACE_DB_PASS@REPLACE_DB_ENDPOINT:5432/mlflowdb
+        - name: ARTIFACT_ROOT
+          value: s3://REPLACE_S3_BUCKET/mlflow-artifacts
+        ports: [{ containerPort: 5000 }]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlflow
+  namespace: unified
+spec:
+  ports: [{ port: 5000, targetPort: 5000 }]
+  selector: { app: mlflow }

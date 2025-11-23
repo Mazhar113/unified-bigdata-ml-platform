@@ -1,0 +1,10 @@
+architecture: "standalone"
+auth:
+  enabled: false
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+persistence:
+  enabled: true
+  size: 20Gi

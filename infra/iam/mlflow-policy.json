@@ -1,0 +1,7 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    { "Effect": "Allow", "Action": ["s3:*"], "Resource": ["arn:aws:s3:::REPLACE_S3_BUCKET/*"] },
+    { "Effect": "Allow", "Action": ["rds-db:connect"], "Resource": ["arn:aws:rds:REPLACE_REGION:REPLACE_ACCOUNT_ID:db:REPLACE_DB_INSTANCE"] }
+  ]
+}

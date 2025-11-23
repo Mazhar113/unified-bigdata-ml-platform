@@ -1,0 +1,10 @@
+redis:
+  enabled: true
+core:
+  enabled: true
+serving:
+  enabled: true
+ingest:
+  enabled: true
+persistence:
+  s3_bucket: REPLACE_S3_BUCKET

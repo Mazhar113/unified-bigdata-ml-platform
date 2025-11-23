@@ -1,0 +1,8 @@
+# Example IAM service account manifest for Feast/FeatureServing with IRSA annotations
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: feast-serving
+  namespace: feast
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::REPLACE_ACCOUNT_ID:role/feast-serving-role

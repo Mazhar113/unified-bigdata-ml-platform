@@ -1,0 +1,4 @@
+apiVersion: v2
+name: feast
+description: Minimal Feast chart scaffold (update with upstream configs)
+version: 0.1.0

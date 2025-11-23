@@ -1,0 +1,8 @@
+groups:
+- name: kafka.rules
+  rules:
+  - alert: KafkaHighConsumerLag
+    expr: kafka_consumergroup_current_offset - kafka_consumergroup_committed_offset > 1000
+    for: 5m
+    labels: { severity: critical }
+    annotations: { summary: "High consumer lag" }

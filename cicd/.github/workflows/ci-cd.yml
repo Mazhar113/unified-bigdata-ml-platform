@@ -1,0 +1,47 @@
+name: CI-CD
+on:
+  push:
+    branches: [ main ]
+env:
+  AWS_REGION: us-east-1
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+        aws-region: ${{ env.AWS_REGION }}
+    - name: Login to ECR
+      run: |
+        aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+    - name: Build & push images
+      run: |
+        docker build -t ${{ secrets.ECR_REGISTRY }}/producer:${GITHUB_SHA::8} -f services/producer/Dockerfile services/producer
+        docker push ${{ secrets.ECR_REGISTRY }}/producer:${GITHUB_SHA::8}
+        docker build -t ${{ secrets.ECR_REGISTRY }}/consumer:${GITHUB_SHA::8} -f services/consumer/Dockerfile services/consumer
+        docker push ${{ secrets.ECR_REGISTRY }}/consumer:${GITHUB_SHA::8}
+        docker build -t ${{ secrets.ECR_REGISTRY }}/model-service:${GITHUB_SHA::8} -f services/model-server/Dockerfile services/model-server
+        docker push ${{ secrets.ECR_REGISTRY }}/model-service:${GITHUB_SHA::8}
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+        aws-region: ${{ env.AWS_REGION }}
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with: { version: '1.28.0' }
+    - name: Update kubeconfig
+      run: aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
+    - name: Deploy via Helm
+      run: |
+        helm upgrade --install producer k8s/charts/producer --namespace unified --set image.repository=${{ secrets.ECR_REGISTRY }}/producer --set image.tag=${GITHUB_SHA::8}
+        helm upgrade --install consumer k8s/charts/consumer --namespace unified --set image.repository=${{ secrets.ECR_REGISTRY }}/consumer --set image.tag=${GITHUB_SHA::8}
+        helm upgrade --install model-service k8s/charts/model-service --namespace unified --set image.repository=${{ secrets.ECR_REGISTRY }}/model-service --set image.tag=${GITHUB_SHA::8}
